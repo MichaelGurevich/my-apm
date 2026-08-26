@@ -1,0 +1,16 @@
+name: my-apm
+version: 0.1.0
+description: Skill pack bundling grill-me (interview/stress-test a plan) and to-spec (synthesize a conversation into a spec)
+author: MichaelGurevich
+# Which agent platforms to deploy to (uncomment to pin):
+# targets:
+#   - copilot
+#   - claude
+
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+devDependencies:
+  apm: []
+scripts: {}
