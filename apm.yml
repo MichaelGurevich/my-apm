@@ -1,6 +1,7 @@
 name: my-apm
 version: 0.1.0
-description: Skill packs bundling grill-me and to-spec, curated via APM marketplace
+description: Skill packs bundling grill-me and to-spec, curated via APM 
+  marketplace
 marketplace:
   owner:
     name: MichaelGurevich
@@ -27,7 +28,11 @@ marketplace:
   packages:
     # Local-path entry: ship a package shipped alongside this repo.
     - name: engineering
-      description: Skill pack bundling grill-me (interview/stress-test a plan) and to-spec (synthesize a conversation into a spec)
+      description: Skill pack bundling grill-me (interview/stress-test a plan) 
+        and to-spec (synthesize a conversation into a spec)
       source: ./packages/engineering
       version: 0.1.0
       # tag_pattern: "{name}-v{version}"
+dependencies:
+  apm:
+    - MichaelGurevich/my-apm/packages/engineering
