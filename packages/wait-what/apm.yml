@@ -1,0 +1,10 @@
+name: wait-what
+version: 0.1.0
+description: "Stop. That last message did not land: re-pitch it."
+author: Matt Pocock
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

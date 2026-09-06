@@ -1,0 +1,14 @@
+name: implement
+version: 0.1.0
+description: "Implement a piece of work based on a spec or set of tickets."
+author: Matt Pocock
+license: MIT
+dependencies:
+  apm:
+    - mattpocock/skills/skills/engineering/tdd#3cca18b368ae95cdbdebbff572ccafa662551015
+    - mattpocock/skills/skills/engineering/codebase-design#3cca18b368ae95cdbdebbff572ccafa662551015
+    - mattpocock/skills/skills/engineering/code-review#3cca18b368ae95cdbdebbff572ccafa662551015
+    - mattpocock/skills/skills/engineering/setup-matt-pocock-skills#3cca18b368ae95cdbdebbff572ccafa662551015
+  mcp: []
+includes: auto
+scripts: {}
