@@ -1,11 +1,10 @@
 name: tdd
 version: 0.1.0
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
-author: Matt Pocock
+description: Implement one ticket from to-tickets test-first, by coordinating red, green and refactor agents. Use when the user wants a ticket built with TDD or mentions "red-green-refactor".
+author: Michael Gurevich
 license: MIT
 dependencies:
   apm:
-    - mattpocock/skills/skills/engineering/codebase-design#3cca18b368ae95cdbdebbff572ccafa662551015
   mcp: []
 includes: auto
 scripts: {}

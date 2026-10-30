@@ -1,8 +1,10 @@
 # Good and Bad Tests
 
+Tests verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't. A good test reads like a specification: "user can checkout with valid cart" says exactly what capability exists and survives refactors because it doesn't care about internal structure.
+
 ## Good Tests
 
-**Integration-style**: Test through real interfaces, not mocks of internal parts.
+Test through real interfaces, not mocks of internal parts.
 
 ```typescript
 // GOOD: Tests observable behavior
@@ -24,7 +26,7 @@ Characteristics:
 
 ## Bad Tests
 
-**Implementation-detail tests**: Coupled to internal structure.
+**Implementation-detail tests**: coupled to internal structure.
 
 ```typescript
 // BAD: Tests implementation details
@@ -41,8 +43,8 @@ Red flags:
 - Testing private methods
 - Asserting on call counts/order
 - Test breaks when refactoring without behavior change
-- Test name describes HOW not WHAT
-- Verifying through external means instead of interface
+- Test name describes HOW, not WHAT
+- Verifying through external means instead of the interface
 
 ```typescript
 // BAD: Bypasses interface to verify
@@ -60,7 +62,7 @@ test("createUser makes user retrievable", async () => {
 });
 ```
 
-**Tautological tests**: Expected value restates the implementation, so the test passes by construction.
+**Tautological tests**: the expected value restates the implementation, so the test passes by construction.
 
 ```typescript
 // BAD: Expected value is recomputed the way the code computes it
