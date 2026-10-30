@@ -11,6 +11,8 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 | [wait-what](packages/wait-what/) | `/wait-what` |
 | [tdd](packages/tdd/) | `/implement-tdd` |
 
+[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `grill-me`, `to-spec`, `to-tickets` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes.
+
 Package names match the upstream skill names. Upstream skill contents are preserved, except `tdd`, whose skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents.
 
 ## Install a package
