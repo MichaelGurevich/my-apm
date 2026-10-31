@@ -5,10 +5,8 @@ author: Michael Gurevich
 license: MIT
 dependencies:
   apm:
-    - MichaelGurevich/my-apm/packages/ideation
-    - MichaelGurevich/my-apm/packages/grill-me
-    - MichaelGurevich/my-apm/packages/to-spec
-    - MichaelGurevich/my-apm/packages/to-tickets
+    - MichaelGurevich/my-apm/packages/plan
+    - MichaelGurevich/my-apm/packages/design
     - MichaelGurevich/my-apm/packages/tdd
   mcp: []
 includes: auto

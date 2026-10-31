@@ -10,11 +10,11 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 | [to-tickets](packages/to-tickets/) | `/to-tickets` |
 | [wait-what](packages/wait-what/) | `/wait-what` |
 | [tdd](packages/tdd/) | `/implement-tdd` |
-| [ideation](packages/ideation/) | `/ideation`, `/to-idea` |
+| [plan](packages/plan/) | `/ideation`, `/to-idea` |
 
-[ideation](packages/ideation/) is original to this repository, not imported from upstream. It refines a rough idea through a non-technical interview (`/ideation`), then writes it up as an idea brief (`/to-idea`), to run before `grill-me`.
+[plan](packages/plan/) is original to this repository, not imported from upstream. It refines a rough idea through a non-technical interview (`/ideation`), then writes it up as an idea brief (`/to-idea`), to run before `grill-me`.
 
-[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `ideation`, `grill-me`, `to-spec`, `to-tickets` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes.
+[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec` and `to-tickets` the same way.
 
 Package names match the upstream skill names. Upstream skill contents are preserved, except `tdd`, whose skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents.
 
@@ -32,7 +32,7 @@ Replace `tdd` with any package name in the table. Once the packages are committe
 apm install MichaelGurevich/my-apm/packages/tdd
 ```
 
-The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`ideation` has two); all but `tdd` and `ideation` also carry the upstream MIT license and a provenance README, and `tdd` adds agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
+The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `tdd` and `plan` also carry the upstream MIT license and a provenance README, and `tdd` adds agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
 
 ## Supporting skills and setup
 
