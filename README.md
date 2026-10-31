@@ -1,6 +1,6 @@
 # My APM packages
 
-Six independently installable APM packages imported from [mattpocock/skills](https://github.com/mattpocock/skills) at commit [`3cca18b368ae95cdbdebbff572ccafa662551015`](https://github.com/mattpocock/skills/commit/3cca18b368ae95cdbdebbff572ccafa662551015) (upstream version `1.2.3`), except `grill-me`, which is the original standalone skill from commit [`a6bdfd9`](https://github.com/mattpocock/skills/tree/a6bdfd9/grill-me).
+Five independently installable APM packages imported from [mattpocock/skills](https://github.com/mattpocock/skills) at commit [`3cca18b368ae95cdbdebbff572ccafa662551015`](https://github.com/mattpocock/skills/commit/3cca18b368ae95cdbdebbff572ccafa662551015) (upstream version `1.2.3`), except `grill-me`, which is the original standalone skill from commit [`a6bdfd9`](https://github.com/mattpocock/skills/tree/a6bdfd9/grill-me).
 
 | Package | Skill invocation |
 | --- | --- |
@@ -9,7 +9,7 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 | [to-spec](packages/to-spec/) | `/to-spec` |
 | [to-tickets](packages/to-tickets/) | `/to-tickets` |
 | [wait-what](packages/wait-what/) | `/wait-what` |
-| [build](packages/build/) | `/implement-tdd` |
+| [tdd](packages/tdd/) | `/implement-tdd` |
 | [plan](packages/plan/) | `/ideation`, `/to-idea` |
 | [spec-review](packages/spec-review/) | `/spec-review` |
 | [spec-revise](packages/spec-revise/) | `/spec-revise` |
@@ -20,28 +20,30 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 
 [spec-revise](packages/spec-revise/), also original, acts on that report. It walks the user through each finding (accept, modify, decline or defer), writes the agreed changes into the spec at its source, records declined and deferred items in the spec so the next review doesn't re-raise them, and saves a revision log to `.scratch/<feature-slug>/spec-revision.md`.
 
-[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `build` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec`, `spec-review`, `spec-revise` and `to-tickets` the same way.
+[code-review](packages/code-review/) is original too, replacing the upstream two-axis `code-review`, and applies the same panel model to code. It pins a change (commits and uncommitted work since a base ref) to a diff, finds the ticket or spec it implements, picks the lenses that apply (correctness, spec conformance, standards, design, tests, security, performance, operability), runs one read-only agent per selected lens in parallel, and merges their findings into a single report with a merge-readiness verdict, saved to `.scratch/<feature-slug>/code-review/`. The whole review is read-only: the lens agents have no write or shell tools, and a hook limits the coordinator to writing under `.scratch/` and running read-only `git` and `gh` queries. The upstream Standards and Spec axes live on as the standards lens (with its code-smell baseline) and the spec conformance lens. It runs after `implement-tdd`.
 
-Package names match the upstream skill names, except `build`, which is based on upstream `tdd`: its skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents. All other upstream skill contents are preserved.
+[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `build` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec`, `spec-review`, `spec-revise` and `to-tickets` the same way, and [build](packages/build/) is a bundle that pulls in `tdd` and `code-review`.
+
+Package names match the upstream skill names. Upstream skill contents are preserved, except `tdd`, whose skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents.
 
 ## Install a package
 
 Run from the project where you want to use the skill:
 
 ```powershell
-apm install C:/Coding/my-apm/packages/build
+apm install C:/Coding/my-apm/packages/tdd
 ```
 
-Replace `build` with any package name in the table. Once the packages are committed and pushed, they can also be installed from GitHub:
+Replace `tdd` with any package name in the table. Once the packages are committed and pushed, they can also be installed from GitHub:
 
 ```sh
-apm install MichaelGurevich/my-apm/packages/build
+apm install MichaelGurevich/my-apm/packages/tdd
 ```
 
-The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `build`, `plan`, `spec-review` and `spec-revise` also carry the upstream MIT license and a provenance README, and `build` and `spec-review` add agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
+The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml`. The bundles (`asdlc`, `design` and `build`) hold nothing else; every other package has one complete skill under `.apm/skills/<skill-name>/` (`plan` has two). All but `tdd`, `code-review`, `plan`, `spec-review` and `spec-revise` also carry the upstream MIT license and a provenance README, and `tdd`, `code-review` and `spec-review` add agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
 
 ## Supporting skills and setup
 
 Manifests declare the supporting skills needed by each workflow, pinned to the same upstream commit. Dependencies use upstream paths so each package can be installed independently, including before this repository is published.
 
-For tracker-dependent workflows (`code-review`, `to-spec`, and `to-tickets`), run `/setup-matt-pocock-skills` in the consuming project before using them. It is included as a dependency; installation does not execute it. Skill workflows have been copied without executing them.
+For tracker-dependent workflows (`to-spec` and `to-tickets`), run `/setup-matt-pocock-skills` in the consuming project before using them. It is included as a dependency; installation does not execute it. Skill workflows have been copied without executing them.

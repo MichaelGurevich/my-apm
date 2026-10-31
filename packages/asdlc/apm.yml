@@ -1,6 +1,6 @@
 name: asdlc
 version: 0.1.0
-description: "Agentic SDLC bundle: refine an idea with ideation and to-idea, grill the plan with grill-me, write it up with to-spec, review and revise it with spec-review and spec-revise, break it into tickets with to-tickets, then build each ticket test-first with implement-tdd."
+description: "Agentic SDLC bundle: refine an idea with ideation and to-idea, grill the plan with grill-me, write it up with to-spec, review and revise it with spec-review and spec-revise, break it into tickets with to-tickets, then build each ticket test-first with implement-tdd and review the change with code-review."
 author: Michael Gurevich
 license: MIT
 dependencies:

@@ -1,87 +1,96 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: Review a code change through the lenses that apply to it (correctness, spec conformance, standards, design, tests, security, performance, operability), one agent per lens, and merge their findings into one report. Use when the user wants a branch, PR, ticket's work or uncommitted changes reviewed before merging.
+argument-hint: "[base ref, ticket or spec path, issue number or URL] [lenses to force, or \"all\"]"
+disable-model-invocation: true
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell"
+      hooks:
+        - type: command
+          command: 'bash "$CLAUDE_PROJECT_DIR/.claude/skills/code-review/scripts/guard-read-only.sh"'
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+# Code Review
 
-- **Standards**: does the code conform to this repo's documented coding standards?
-- **Spec**: does the code faithfully implement the originating issue / spec?
+## Role
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
+You review one code change by coordinating a panel of lens agents. You pin the change to a diff, find what it was meant to do, decide which lenses apply, dispatch one agent per selected lens with the Agent tool, then merge their findings into a single report. You don't review the code yourself, beyond the reading needed to choose lenses and check findings. A lens you review in the main thread skips the contract its agent follows.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
+You are read-only, like your agents. You write only your own files under `.scratch/` (the pinned diff and ticket, and the report), and in Bash you run only read-only `git` and `gh` queries and read utilities, one command at a time, without `$(...)`. The skill's hook blocks everything else. When it blocks a command you need, split it into simpler allowed ones; never work around it, and never change the code, the index, branches or the stash.
 
-## Process
+## Input
 
-### 1. Pin the fixed point
+All optional; ask only for what you can't work out.
 
-Whatever the user said is the fixed point (a commit SHA, branch name, tag, `main`, `HEAD~5`, etc.). If they didn't specify one, ask for it.
+- **The change:** a base ref (commit, branch, tag or `HEAD~n`) to diff against. Without one, use the merge-base with the default branch when you're on another branch; on the default branch itself, ask.
+- **What it was meant to do:** a ticket in the format `to-tickets` publishes (`.scratch/<feature-slug>/issues/<NN>-<slug>.md` or a tracker issue) or a spec, as a path, issue number or URL.
+- **Lenses to force on** (for example `security performance`), or `all` to run every lens. Forced lenses are added to the ones you select, not used in their place.
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+## Roster
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here, not inside two parallel sub-agents.
+| Lens | Agent | Reviews | Select when the change... |
+|---|---|---|---|
+| Correctness | `code-review-correctness` | Logic, edge cases, error paths, state, concurrency, broken callers | Always. |
+| Spec conformance | `code-review-spec` | Acceptance criteria met, missing or partial requirements, scope creep | Has a ticket or spec to compare against. Skip, and say so, when there is none. |
+| Standards | `code-review-standards` | Documented repo standards, naming, readability, code smells, hygiene | Always. |
+| Design | `code-review-design` | Fit with the codebase and ADRs, boundaries, coupling, abstractions, interface and schema compatibility | Adds or changes modules, public interfaces, schemas, events, shared state or dependencies between modules. |
+| Tests | `code-review-tests` | Coverage of the changed behavior, test quality, seams, mocks, flakiness | Changes behavior. Skip only for changes with nothing to test (docs, comments, pure renames). |
+| Security | `code-review-security` | Authn/authz, input handling, injection, secrets, sensitive data, abuse, new dependencies | Touches auth, permissions, user input, queries, external calls, files, secrets, personal data, crypto or new third-party code. |
+| Performance | `code-review-performance` | Complexity, queries, I/O, memory, caching, hot paths | Loops over data, queries a store, does I/O or network calls, or changes code on a hot or user-facing path. |
+| Operability | `code-review-operability` | Logging, metrics, timeouts and retries, configuration, migrations, rollout and rollback | Ships to a running environment, or changes external calls, config, data, migrations or infrastructure. |
 
-### 2. Identify the spec source
+## Setup
 
-Look for the originating spec, in this order:
+1. **Pin the change to a file.** Lens agents read files; they can't run git. Resolve the base (`git rev-parse <base>`, then `git merge-base <base> HEAD`), create `<review-dir>` with `mkdir -p`, and redirect `git diff <merge-base>` into `<review-dir>/<name>.diff`. That diff covers commits and uncommitted changes to tracked files. Check `git ls-files --others --exclude-standard` for new untracked files that belong to the change and append each with `git diff --no-index /dev/null <file>`; ask when it's unclear whether one belongs. Note the commit list (`git log --oneline <merge-base>..HEAD`) and the changed files (`git diff --stat <merge-base>`). If the base doesn't resolve or the diff is empty, stop here and tell the user.
+2. **Name the review.** `<review-dir>` is `.scratch/<feature-slug>/code-review/`, with the feature slug taken from the ticket's path, or from the branch name when there's no ticket. `<name>` is the ticket's file name (`<NN>-<slug>`) when you review a ticket, otherwise the short SHA of `HEAD`, suffixed `-wip` when the diff includes uncommitted changes.
+3. **Find what the change was meant to do.** Look in this order: the ticket or spec the user passed; issue references in the commit messages (`#123`, `Closes #45`); a ticket under `.scratch/<feature-slug>/issues/` matching the branch. When the ticket names a parent spec, take that too. Pin tracker issues verbatim (body and comments) to `<review-dir>/<name>.ticket.md`. If you find nothing, ask the user once; if there is none, skip the spec lens.
+4. **Find the project's standards.** Note which exist and where: `CONTEXT.md`, ADRs (`docs/adr/` or similar), `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, and the formatter, linter and type-checker configs (agents skip what tooling enforces).
+5. **Select the lenses.** Go down the roster and decide each lens from what the diff actually changes, not from what the feature type usually involves. When unsure, select it: an agent that finds the lens doesn't apply says so cheaply, while a skipped lens can't report anything. Add any lenses the user forced.
+6. **Announce the panel** in one message: the base, the diff size (files, lines added and removed), the ticket or spec found, each selected lens with the part of the diff that triggered it, and each skipped lens with why. Then dispatch without waiting. The user can ask for a skipped lens afterwards.
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in `docs/agents/issue-tracker.md`.
-2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
+## Workflow
 
-### 3. Identify the standards sources
+1. **Dispatch the panel.** Send every selected agent in a single message so they run in parallel. Each prompt carries the handoff below and nothing about other lenses' concerns; overlap is resolved at merge, not by narrowing agents up front.
+2. **Collect the reports.** If an agent reports the lens doesn't apply, record that and move on. If an agent fails or returns something outside the contract, re-dispatch it once with the problem stated; if it fails again, list the lens as not reviewed.
+3. **Check the findings.** For each finding, check its evidence against the code: the quoted lines exist at the location given, and the thing reported missing really is absent from the diff and the code around it. Drop findings that misquote the code, point at lines the change doesn't touch or affect, or report as missing something the change covers, and note how many you dropped. Don't upgrade, rewrite or add findings of your own.
+4. **Merge.** When several lenses report the same underlying problem (for example correctness and security both flag an unchecked input), keep one finding at the highest severity given, list every lens that raised it, and combine their recommendations. Keep each lens's original ID so findings can be traced back.
+5. **Write the report** (see Final report) and save it.
 
-Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+## Handoff contract
 
-On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
+Each agent starts with no context but what you give it.
 
-- **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
-- **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation. Like any standard here, skip anything tooling already enforces.
+| Pass in | Expect back |
+|---|---|
+| The diff file path; the changed files; the commit list; the ticket and spec paths, or "none"; which standards files and tooling configs exist and where; the part of the diff that triggered this lens; any focus the user asked for | The report format in `assets/review-contract.md`: lens verdict, findings with ID, severity, confidence, location, evidence, problem and recommendation, and questions for the author |
 
-Each smell reads *what it is* → *how to fix*; match it against the diff:
+## Decision points
 
-- **Mysterious Name**: a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no honest name comes, the design's murky.
-- **Duplicated Code**: the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.
-- **Feature Envy**: a method that reaches into another object's data more than its own. → move the method onto the data it envies.
-- **Data Clumps**: the same few fields or params keep travelling together (a type wanting to be born). → bundle them into one type, pass that.
-- **Primitive Obsession**: a primitive or string standing in for a domain concept that deserves its own type. → give the concept its own small type.
-- **Repeated Switches**: the same `switch`/`if`-cascade on the same type recurs across the change. → replace with polymorphism, or one map both sites share.
-- **Shotgun Surgery**: one logical change forces scattered edits across many files in the diff. → gather what changes together into one module.
-- **Divergent Change**: one file or module is edited for several unrelated reasons. → split so each module changes for one reason.
-- **Speculative Generality**: abstraction, parameters, or hooks added for needs the spec doesn't have. → delete it; inline back until a real need shows.
-- **Message Chains**: long `a.b().c().d()` navigation the caller shouldn't depend on. → hide the walk behind one method on the first object.
-- **Middle Man**: a class or function that mostly just delegates onward. → cut it, call the real target direct.
-- **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
+- **Lens doesn't apply after all.** Accept it. Don't re-dispatch with instructions to find something.
+- **A finding contradicts a decision recorded in an ADR, a documented standard or the ticket.** Keep it, but mark it as challenging a recorded decision so the author can reaffirm the decision rather than treat it as an oversight.
+- **Lenses disagree** (for example performance wants a cache and design calls it speculative). Keep both findings and list the conflict under Conflicts in the report. Don't pick a winner; the author decides.
+- **The diff is too large to review well** (roughly 1,500 changed lines or more, or several unrelated changes mixed together). Before dispatching, tell the user and offer to review it in parts: by commit, by directory or by concern. Continue as one review only if they ask.
+- **The diff is mostly generated or vendored** (lockfiles, build output, snapshots, migrations generated by a tool). Leave those files out of the lenses' scope, say so in the panel announcement, and keep any hand-written changes in them in scope.
 
-### 4. Spawn both sub-agents in parallel
+## Final report
 
-**Standards sub-agent prompt** should include:
+Save to `<review-dir>/<name>.md`, then post the Verdict and Blockers sections in chat with the file path.
 
-- The full diff command and commit list.
-- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the sub-agent has no other access to it).
-- The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+Open the report with a header: the base and its merge-base SHA, `HEAD`'s SHA and whether uncommitted changes were included, the pinned diff file, the ticket or spec reviewed against, and the date.
 
-**Spec sub-agent prompt** should include:
+Then, result first:
 
-- The diff command and commit list.
-- The path or fetched contents of the spec.
-- The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
+1. **Verdict:** one of
+   - **Ready to merge:** no blockers or majors.
+   - **Ready with changes:** majors only. Each can be fixed where it is, without rethinking the approach.
+   - **Not ready:** any blocker, or majors that need the approach reconsidered.
 
-If the spec is missing, skip the Spec sub-agent and note this in the final report.
-
-### 5. Aggregate
-
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
-
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
-
-## Why two axes
-
-A change can pass one axis and fail the other:
-
-- Code that follows every standard but implements the wrong thing → **Standards pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
-
-Reporting them separately stops one axis from masking the other.
+   Follow with one sentence on why, and the finding counts by severity.
+2. **Blockers:** every blocker, in full.
+3. **Major findings:** in full, grouped by file, or under "Missing from the change" when they report something absent.
+4. **Minor findings:** one line each, with ID, location and recommendation.
+5. **Questions for the author:** merged from every lens, deduplicated, each tagged with the lenses that asked it.
+6. **Conflicts:** findings where lenses recommend opposite changes, side by side.
+7. **Coverage:** a table of every lens in the roster: selected or skipped, why, the lens verdict, and finding counts. Include lenses that weren't reviewed, files left out of scope, and findings dropped at the check.
+8. **Next step:** unless the verdict is Ready to merge, suggest fixing the findings, then re-running `/code-review` against the same base. For a ticket built with `implement-tdd`, findings that change behavior go back through it as new slices, test first. Don't edit the code or start any of these steps yourself.
