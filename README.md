@@ -9,7 +9,7 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 | [to-spec](packages/to-spec/) | `/to-spec` |
 | [to-tickets](packages/to-tickets/) | `/to-tickets` |
 | [wait-what](packages/wait-what/) | `/wait-what` |
-| [tdd](packages/tdd/) | `/implement-tdd` |
+| [build](packages/build/) | `/implement-tdd` |
 | [plan](packages/plan/) | `/ideation`, `/to-idea` |
 | [spec-review](packages/spec-review/) | `/spec-review` |
 | [spec-revise](packages/spec-revise/) | `/spec-revise` |
@@ -20,25 +20,25 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 
 [spec-revise](packages/spec-revise/), also original, acts on that report. It walks the user through each finding (accept, modify, decline or defer), writes the agreed changes into the spec at its source, records declined and deferred items in the spec so the next review doesn't re-raise them, and saves a revision log to `.scratch/<feature-slug>/spec-revision.md`.
 
-[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec`, `spec-review`, `spec-revise` and `to-tickets` the same way.
+[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `build` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec`, `spec-review`, `spec-revise` and `to-tickets` the same way.
 
-Package names match the upstream skill names. Upstream skill contents are preserved, except `tdd`, whose skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents.
+Package names match the upstream skill names, except `build`, which is based on upstream `tdd`: its skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents. All other upstream skill contents are preserved.
 
 ## Install a package
 
 Run from the project where you want to use the skill:
 
 ```powershell
-apm install C:/Coding/my-apm/packages/tdd
+apm install C:/Coding/my-apm/packages/build
 ```
 
-Replace `tdd` with any package name in the table. Once the packages are committed and pushed, they can also be installed from GitHub:
+Replace `build` with any package name in the table. Once the packages are committed and pushed, they can also be installed from GitHub:
 
 ```sh
-apm install MichaelGurevich/my-apm/packages/tdd
+apm install MichaelGurevich/my-apm/packages/build
 ```
 
-The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `tdd`, `plan`, `spec-review` and `spec-revise` also carry the upstream MIT license and a provenance README, and `tdd` and `spec-review` add agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
+The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `build`, `plan`, `spec-review` and `spec-revise` also carry the upstream MIT license and a provenance README, and `build` and `spec-review` add agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
 
 ## Supporting skills and setup
 

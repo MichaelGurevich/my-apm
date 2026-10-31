@@ -1,4 +1,4 @@
-name: tdd
+name: build
 version: 0.1.0
 description: Implement one ticket from to-tickets test-first, by coordinating red, green and refactor agents. Use when the user wants a ticket built with TDD or mentions "red-green-refactor".
 author: Michael Gurevich
