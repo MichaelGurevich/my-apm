@@ -1,0 +1,10 @@
+name: exercise
+version: 0.1.0
+description: Exercise a built feature end to end by launching the app and driving it through the spec's user stories as a user would, one agent per scenario, recording evidence and defects in one report. Use when the user wants a feature checked in the running app, not just by its tests.
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

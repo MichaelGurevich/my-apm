@@ -1,0 +1,10 @@
+name: verify
+version: 0.1.0
+description: Verify a built feature against its spec and tickets by running the test suite and tracing every user story and acceptance criterion to the tests that prove it, one read-only agent per ticket plus one for the spec, merged into one traceability report. Use when the user wants to know whether a feature is done before shipping it.
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

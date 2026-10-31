@@ -1,0 +1,12 @@
+name: test
+version: 0.1.0
+description: "Test bundle: exercise the built feature end to end in the running app with exercise, then verify it against its spec and tickets with verify."
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm:
+    - MichaelGurevich/my-apm/packages/exercise
+    - MichaelGurevich/my-apm/packages/verify
+  mcp: []
+includes: auto
+scripts: {}
