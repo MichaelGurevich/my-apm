@@ -1,0 +1,10 @@
+name: ideation
+version: 0.1.0
+description: "Refine a rough idea before grill-me: ideation interviews the user about it without technical detail, and to-idea writes the conversation up as an idea brief in a Markdown file."
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}
