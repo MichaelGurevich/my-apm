@@ -11,10 +11,16 @@ Six independently installable APM packages imported from [mattpocock/skills](htt
 | [wait-what](packages/wait-what/) | `/wait-what` |
 | [tdd](packages/tdd/) | `/implement-tdd` |
 | [plan](packages/plan/) | `/ideation`, `/to-idea` |
+| [spec-review](packages/spec-review/) | `/spec-review` |
+| [spec-revise](packages/spec-revise/) | `/spec-revise` |
 
 [plan](packages/plan/) is original to this repository, not imported from upstream. It refines a rough idea through a non-technical interview (`/ideation`), then writes it up as an idea brief (`/to-idea`), to run before `grill-me`.
 
-[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec` and `to-tickets` the same way.
+[spec-review](packages/spec-review/) is also original to this repository. It reads a spec, picks the review lenses that apply (requirements, non-functional, security, privacy and compliance, architecture, operability, testing, delivery), runs one read-only agent per selected lens in parallel, and merges their findings into a single report with a readiness verdict, saved to `.scratch/<feature-slug>/spec-review.md`. It fits between `to-spec` and `to-tickets`.
+
+[spec-revise](packages/spec-revise/), also original, acts on that report. It walks the user through each finding (accept, modify, decline or defer), writes the agreed changes into the spec at its source, records declined and deferred items in the spec so the next review doesn't re-raise them, and saves a revision log to `.scratch/<feature-slug>/spec-revision.md`.
+
+[asdlc](packages/asdlc/) adds no skill of its own. Installing it pulls in `plan`, `design` and `tdd` from this repository's `main` branch on GitHub, so the bundle reflects only pushed changes. [design](packages/design/) is itself a bundle that pulls in `grill-me`, `to-spec`, `spec-review`, `spec-revise` and `to-tickets` the same way.
 
 Package names match the upstream skill names. Upstream skill contents are preserved, except `tdd`, whose skill is renamed `implement-tdd` and rewritten as a coordinator for three `tdd-red`/`tdd-green`/`tdd-refactor` agents.
 
@@ -32,7 +38,7 @@ Replace `tdd` with any package name in the table. Once the packages are committe
 apm install MichaelGurevich/my-apm/packages/tdd
 ```
 
-The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `tdd` and `plan` also carry the upstream MIT license and a provenance README, and `tdd` adds agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
+The repository's root `apm.yml` remains the existing project manifest. Each directory under `packages/` has its own `apm.yml` and one complete skill under `.apm/skills/<skill-name>/` (`plan` has two); all but `tdd`, `plan`, `spec-review` and `spec-revise` also carry the upstream MIT license and a provenance README, and `tdd` and `spec-review` add agents under `.apm/agents/`. This follows the [APM skill package layout](https://microsoft.github.io/apm/producer/author-primitives/skills/).
 
 ## Supporting skills and setup
 

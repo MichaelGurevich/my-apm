@@ -1,0 +1,10 @@
+name: spec-review
+version: 0.1.0
+description: Review a spec through the lenses that apply to it (requirements, NFRs, security, privacy, architecture, operability, testing, delivery), one agent per lens, and merge their findings into one report. Use when the user wants a spec reviewed before it is broken into tickets.
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

@@ -1,0 +1,10 @@
+name: spec-revise
+version: 0.1.0
+description: Revise a spec from its spec-review report, by walking the user through each finding, agreeing the changes, and writing them into the spec. Use after spec-review, when the user wants to act on its findings.
+author: Michael Gurevich
+license: MIT
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}
